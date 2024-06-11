@@ -19,4 +19,5 @@ def raise_orbit(alt0):
     v0 = np.sqrt(mu*((2/r)-(1/a0)))
     v = np.sqrt(mu*((2/r)-(1/a)))
     dv = v - v0
+    dv = dv*1000 # convert to m/s
     return dv
