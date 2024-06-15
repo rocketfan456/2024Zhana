@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Run through sequence
 mSeparated  = np.linspace(3870, 8000, 4)# generate a linspace from 3870 to 8000 with four points
-thrSweep    = np.linspace(3000, 15000,13)
+thrSweep    = np.linspace(3000, 15000,6)
 mStart      = np.zeros((mSeparated.size, thrSweep.size))
 mFinal      = np.zeros((mSeparated.size, thrSweep.size))
 twPDIStart  = np.zeros((mSeparated.size, thrSweep.size))
