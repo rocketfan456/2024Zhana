@@ -23,16 +23,16 @@ class Phase:
         # update the dV calculate the thrust-to-weight
         twPhase = clsEng.thrust/(mStart*9.81)
         if dvPhase<0:
-            dvPhase = 4335*np.exp(-(twPhase)*20.25)+1880
+            dvPhase = 4335*np.exp(-twPhase*20.25)+1880 #use the thrust-to-weight equation from the slides
 
 
         # Calculate Impulse Propellant Using Rocket Equation   
-        mPropImpulse = mStart - mStart / np.exp(dvPhase/(9.81*clsEng.isp))
-
+        # We specify Impulse because we'll have other types later
+        mPropImpulse = mStart - (mStart/np.exp(dvPhase/(9.81*clsEng.isp)))
    
         # Determine Oxidizer and Fuel
-        mPropImpulseOx = 
-        mPropImpulseFuel = 
+        mPropImpulseOx = mPropImpulse*clsEng.mr/(1+clsEng.mr)
+        mPropImpulseFuel = mPropImpulse/(1+clsEng.mr)
         
           
         mEnd = mStart - mPropImpulse 
@@ -41,15 +41,15 @@ class Phase:
         # Move data to class structure to save information
         self.mStart         = mStart
         self.mEnd           = mEnd
-        self.dvPhase        = 
-        self.clsEng         = 
-        self.mPropImpulse   = 
-        self.strName        = 
+        self.dvPhase        = dvPhase
+        self.clsEng         = clsEng
+        self.mPropImpulse   = mPropImpulse
+        self.strName        = strName
         self.twPhase        = twPhase
 
-        self.mPropImpulse   = 
-        self.mPropImpulseOx = 
-        self.mPropImpulseFuel = 
+        self.mPropImpulse   = mPropImpulse
+        self.mPropImpulseOx = mPropImpulseOx
+        self.mPropImpulseFuel = mPropImpulseFuel
           
 class MissionSummary:
     def __init__(self, tupPhases):
@@ -58,9 +58,7 @@ class MissionSummary:
             tupPhases: list of phase classes
         
         """
-
-   
-        
+        # Initialize variables 
         mPropImpulse     = 0
         mPropImpulseOx   = 0
         mPropImpulseFuel = 0
@@ -68,63 +66,63 @@ class MissionSummary:
         # sum up the usages by phase
         for curPhase in tupPhases:
             mPropImpulse     += curPhase.mPropImpulse 
-            mPropImpulseOx   += 
-            mPropImpulseFuel += 
+            mPropImpulseOx   += curPhase.mPropImpulseOx
+            mPropImpulseFuel += curPhase.mPropImpulseFuel
 
         # Stuff everything into self    
-        self.mPropImpulse      = 
-        self.mPropImpulseOx    = 
-        self.mPropImpulseFuel  = 
+        self.mPropImpulse      = mPropImpulse
+        self.mPropImpulseOx    = mPropImpulseOx
+        self.mPropImpulseFuel  = mPropImpulseFuel 
 
 
 
 class Engine:
     def __init__(self,isp, thrust, mr):
-        self.isp = 
-        self.thrust = 
-        self.mr = 
+        self.isp = isp
+        self.thrust = thrust
+        self.mr = mr
 
 class TankSet:
     def __init__(self, strPropType,strMatType, nTanks, lMaxRadTank, presTank, mPropTotal):
         # General Parameters for Tanks
-        pctUllage =          # Extra ullage room as a percentage of tank volume
-        aMax      =           # Maximum acceleration (m/s2)
-        pctFudge  =         # Fudge factor for welds, etc
-        fosMat    =          # factor of safety for material (nd)
+        pctUllage = 0.1         # Extra ullage room as a percentage of tank volume
+        aMax      = 50          # Maximum acceleration (m/s2)
+        pctFudge  = 0.2         # Fudge factor for welds, etc
+        fosMat    = 1.2         # factor of safety for material (nd)
         
         # Tank material switch case
         if strMatType=="Al2219":
-            rhoMat =      # Density of material (kg/m3)
+            rhoMat = 2840     # Density of material (kg/m3)
             sigMat = 2.9e8    # Yield Stress of material (Pa)
-            thkMin =    # Minimum thickness of material (m)
+            thkMin = 0.004    # Minimum thickness of material (m)
         elif strMatType=="Stainless":
             rhoMat = 8000
-            sigMat = 
+            sigMat = 2.15e8
             thkMin = 0.0004
         elif strMatType == "Al-Li":
-            rhoMat = 
-            sigMat = 
+            rhoMat = 2700
+            sigMat = 7e8
             thkMin = 0.004
     
         
         # Propellant Density switch case
         if strPropType=="Oxygen":
-            rhoProp =      # Density of propellant (kg/m3)
+            rhoProp = 1140     # Density of propellant (kg/m3)
         elif strPropType=="Hydrogen":
-            rhoProp = 
+            rhoProp = 70
         elif strPropType == "Methane":
-            rhoProp = 
+            rhoProp = 420
         elif strPropType == "MMH":
-            rhoProp = 
+            rhoProp = 866
         elif strPropType == "NTO":
-            rhoProp = 
+            rhoProp = 1450
         elif strPropType == "RP-1":
-            rhoProp = 
+            rhoProp = 820
         
         
         # Calculate propellant volume and volume per tank (include ullage)
-        volPropTotal    = 
-        volPropPerTank  = 
+        volPropTotal    = mPropTotal/rhoProp
+        volPropPerTank  = volPropTotal/nTanks
         volPerTank      = volPropPerTank*(1+pctUllage)
         
         # Compare volume of tank to maximum allowable for given radius
@@ -144,32 +142,32 @@ class TankSet:
             lCylTank    = (volPerTank-4/3*np.pi*(lRadiusTank**3))/(np.pi*lRadiusTank**2)
        
         # Calculate the total length of the tank 
-        lTankLength = 
+        lTankLength = lCylTank + 2*lRadiusTank
         
         # Calculate the surface area of each portion of the tank
         saDomesPerTank   = 4*np.pi*lRadiusTank**2
         saCylinderPerTank = 2*np.pi*lRadiusTank*lCylTank
-        saTotalPerTank   = 
+        saTotalPerTank   = saDomesPerTank + saCylinderPerTank
        
         # Calculate the thickness.  Start with pressure
         presTotal = fosMat*(presTank + rhoProp*aMax*lTankLength)
-        thkDomesCalc  = 
+        thkDomesCalc  = (presTotal*lRadiusTank) / (2*sigMat)
         thkCylCalc    = 2*thkDomesCalc
         
         # Compare the pressure thickness to the minimum thickness
         thkDomes  = max(thkDomesCalc,thkMin)
-        thkCyl    = 
+        thkCyl    = max(thkCylCalc,thkMin)
 
         # Calculate the volume of the material
         volMatDomesPerTank = thkDomes*saDomesPerTank
-        volMatCylPerTank   = 
+        volMatCylPerTank   = thkCyl*saCylinderPerTank
         
         # Calculate the mass of each tank
         mDomesPerTank = volMatDomesPerTank*rhoMat
-        mCylPerTank   = 
+        mCylPerTank   = volMatCylPerTank*rhoMat
         
         # Add in the fudge factor 
-        mTotalPerTank = 
+        mTotalPerTank = (mDomesPerTank+mCylPerTank)*(1+pctFudge)
         mTotal        = (mTotalPerTank*nTanks)*(1.1**nTanks)
         
        
@@ -177,32 +175,32 @@ class TankSet:
        
         # Stuff everything back into "self" for output
         self.strPropType = strPropType
-        self.strMatType  = 
+        self.strMatType  = strMatType
         self.nTanks      = nTanks
         self.lMaxRadTank = lMaxRadTank
-        self.presTank    = 
+        self.presTank    = presTank
         self.mPropTotal  = mPropTotal
        
         self.pctUllage       = pctUllage
         self.rhoProp         = rhoProp
-        self.volPropTotal    = 
+        self.volPropTotal    = volPropTotal
         self.volPropPerTank  = volPropPerTank
-        self.volPerTank      = 
+        self.volPerTank      = volPerTank
         self.volMaxRadius    = volMaxRadius
-        self.lRadiusTank     = 
+        self.lRadiusTank     = lRadiusTank
         self.lCylTank        = lCylTank
-        self.lTankLength     = 
+        self.lTankLength     = lTankLength
         self.saDomesPerTank     = saDomesPerTank
-        self.saCylinderPerTank  = 
-        self.saTotalPerTank  = 
-        self.presTotal       = 
-        self.thkDomesCalc    = 
-        self.thkCylCalc      = 
-        self.thkDomes        = 
-        self.thkCyl          = 
-        self.volMatDomesPerTank = 
-        self.volMatCylPerTank = 
-        self.mDomesPerTank   = 
-        self.mCylPerTank     = 
-        self.mTotalPerTank   = 
+        self.saCylinderPerTank  = saCylinderPerTank
+        self.saTotalPerTank  = saTotalPerTank
+        self.presTotal       = presTotal
+        self.thkDomesCalc    = thkDomesCalc
+        self.thkCylCalc      = thkCylCalc
+        self.thkDomes        = thkDomes
+        self.thkCyl          = thkCyl
+        self.volMatDomesPerTank = volMatDomesPerTank
+        self.volMatCylPerTank = volMatCylPerTank
+        self.mDomesPerTank   = mDomesPerTank
+        self.mCylPerTank     = mCylPerTank
+        self.mTotalPerTank   = mTotalPerTank
         self.mTotal          = mTotal
