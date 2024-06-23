@@ -104,7 +104,63 @@ class TestTankset(unittest.TestCase):
         np.testing.assert_approx_equal(tanks.mCylPerTank, 0.00, 5)        # mass of cylinder
         np.testing.assert_approx_equal(tanks.mTotalPerTank, 990.512168, 5)      # total mass per tank with fudge factor
         np.testing.assert_approx_equal(tanks.mTotal, 1089.563385, 5)             # total mass for the tank set
-        
-        
+class TestSubsystems(unittest.TestCase):
+    def test_oxygen_hydrogen_large(self):    
+        eng = cf.Engine(450, 8000, 4)
+        oxtanks = cf.TankSet("Oxygen", "Al2219", 1, 0.85, 300000, 3000)
+        fueltanks = cf.TankSet("Hydrogen", "Stainless", 1, 3.85, 300000, 2000)
+        subs = cf.Subsystems(10000, eng, oxtanks, fueltanks, 100, 'Body', 'Large', 8)
+        np.testing.assert_approx_equal(subs.mAvionics, 222.3770614, 5)          # avionics mass
+        np.testing.assert_approx_equal(subs.mWiring, 148.8262375, 5)            # wiring mass 
+        np.testing.assert_approx_equal(subs.pwrTotalMargined, 1690.0, 5)        # Total power draw including margin
+        np.testing.assert_approx_equal(subs.mSolarArray, 56.33333, 5)           # solar array mass
+        np.testing.assert_approx_equal(subs.nrgTotal, 13520.0, 5)         # total energy for battery without depth of discharge
+        np.testing.assert_approx_equal(subs.nrgTotalMargin, 19314.2857142, 5)         # total energy of battery including depth of discharge
+        np.testing.assert_approx_equal(subs.mBattery, 193.14285714285714, 5)      # mass of battery
+        np.testing.assert_approx_equal(subs.mElectrical, 448.30242802685075, 5)  # mass of electrical subsystem
+        np.testing.assert_approx_equal(subs.mSOFIOx, 2.4593866084485203, 5)     # mass of SOFI for ox tanks
+        np.testing.assert_approx_equal(subs.mSOFIFuel, 12.040390166125304, 5)         # mass of SOFI for fuel tanks
+        np.testing.assert_approx_equal(subs.mMLIOx, 0.7870037147035265, 5)        # mass of MLI for Ox tanks
+        np.testing.assert_approx_equal(subs.mMLIFuel, 3.8529248531600975, 5)     # mass of MLI for fuel tanks
+        np.testing.assert_approx_equal(subs.twEngine, 40.0, 5)        # thrust to weight of the engine
+        np.testing.assert_approx_equal(subs.mEngine, 20.38735983690112, 5)           # mass of the engine    
+        np.testing.assert_approx_equal(subs.mPropulsion, 1476.60642, 5)      # mass of propulsion subsystem
+        np.testing.assert_approx_equal(subs.mThermal, 300.0, 5)  # mass of thermal subsystem 
+        np.testing.assert_approx_equal(subs.mDryWithoutStructure, 2447.285916, 5)     # mass of everything but structure and gear
+        np.testing.assert_approx_equal(subs.mStructureAndGear, 951.722300683421, 5)         # mass of structure and gear
+        np.testing.assert_approx_equal(subs.mTotalBasic, 3399.0082167265036, 5)        # basic mass
+        np.testing.assert_approx_equal(subs.mMGA, 509.8512325089755, 5)     # mass growth allowance
+        np.testing.assert_approx_equal(subs.mMargin, 509.8512325089755, 5)        # margin
+        np.testing.assert_approx_equal(subs.mTotalPredicted, 3908.859449235479, 5)           # predicted mass
+        np.testing.assert_approx_equal(subs.mTotalAllowable,  4418.710681744455, 5)           # allowable mass
+    def test_oxygen_methane_small(self):    
+        eng = cf.Engine(370, 10000, 4)
+        oxtanks = cf.TankSet("Oxygen", "Al2219", 1, 0.85, 300000, 1000)
+        fueltanks = cf.TankSet("Methane", "Al2219", 1, 3.85, 300000, 1000)
+        subs = cf.Subsystems(5000, eng, oxtanks, fueltanks, 100, 'Deployable', 'Small', 8)
+        np.testing.assert_approx_equal(subs.mAvionics, 173.14827074792632, 5)          # avionics mass
+        np.testing.assert_approx_equal(subs.mWiring, 85.55250577167209, 5)            # wiring mass 
+        np.testing.assert_approx_equal(subs.pwrTotalMargined, 520.0, 5)        # Total power draw including margin
+        np.testing.assert_approx_equal(subs.mSolarArray, 6.9333333333, 5)           # solar array mass
+        np.testing.assert_approx_equal(subs.nrgTotal, 4160.0, 5)         # total energy for battery without depth of discharge
+        np.testing.assert_approx_equal(subs.nrgTotalMargin, 5942.85714285, 5)         # total energy of battery including depth of discharge
+        np.testing.assert_approx_equal(subs.mBattery, 59.428571, 5)      # mass of battery
+        np.testing.assert_approx_equal(subs.mElectrical, 181.91441053357, 5)  # mass of electrical subsystem
+        np.testing.assert_approx_equal(subs.mSOFIOx, 1.180545388386, 5)     # mass of SOFI for ox tanks
+        np.testing.assert_approx_equal(subs.mSOFIFuel, 2.29713435151045, 5)         # mass of SOFI for fuel tanks
+        np.testing.assert_approx_equal(subs.mMLIOx, 0.3777745242837968, 5)        # mass of MLI for Ox tanks
+        np.testing.assert_approx_equal(subs.mMLIFuel, 0.7350829924833446, 5)     # mass of MLI for fuel tanks
+        np.testing.assert_approx_equal(subs.twEngine, 50.0, 5)        # thrust to weight of the engine
+        np.testing.assert_approx_equal(subs.mEngine, 20.38735983690112, 5)           # mass of the engine    
+        np.testing.assert_approx_equal(subs.mPropulsion, 323.5719, 5)      # mass of propulsion subsystem
+        np.testing.assert_approx_equal(subs.mThermal, 150.0, 5)  # mass of thermal subsystem 
+        np.testing.assert_approx_equal(subs.mDryWithoutStructure, 828.6345913179017, 5)     # mass of everything but structure and gear
+        np.testing.assert_approx_equal(subs.mStructureAndGear, 322.2467855125174, 5)         # mass of structure and gear
+        np.testing.assert_approx_equal(subs.mTotalBasic, 1150.8813768304192, 5)        # basic mass
+        np.testing.assert_approx_equal(subs.mMGA, 172.63220652456286, 5)     # mass growth allowance
+        np.testing.assert_approx_equal(subs.mMargin, 172.63220652456286, 5)        # margin
+        np.testing.assert_approx_equal(subs.mTotalPredicted, 1323.513583354982, 5)           # predicted mass
+        np.testing.assert_approx_equal(subs.mTotalAllowable,  1496.145789879545, 5)           # allowable mass
+
 if __name__ =='__main__':
     unittest.main()
