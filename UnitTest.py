@@ -6,16 +6,15 @@ Created on Sun Dec 13 19:26:02 2020
 """
 
 import unittest
-import FunctionFile as ff # need this for the apogee function
-import Classes_HW6 as cf   # edit this line to point to your Classes file
+import Classes as cf   # edit this line to point to your Classes file
 import numpy as np
 
 class TestApogee(unittest.TestCase):
     def test_apogee_410000(self):
-        dv = ff.raise_orbit(410000)
+        dv = cf.ApogeeRaise(410000)
         np.testing.assert_approx_equal(dv, 0)
     def test_apogee_185(self):
-        dv = ff.raise_orbit(185)
+        dv = cf.ApogeeRaise(185)
         np.testing.assert_approx_equal(dv, 3142.2152618, 5)
         
 class TestPhase(unittest.TestCase):
