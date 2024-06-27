@@ -1,6 +1,5 @@
 import numpy as np
-import Classes_HW6 as cf
-import FunctionFile as ff
+import Classes as cf
 import matplotlib.pyplot as plt
 
 
@@ -25,7 +24,7 @@ for jj, thrust in enumerate(thrSweep):
         # Calculate the DV to raise the orbit. The equation is representative 
         # of launch performance
         apogeeOrbit= 7.7999e-10*mLaunch**4-2.1506e-5*mLaunch**3+2.2196e-1*mLaunch**2-1.0181e3*mLaunch+1.7624e6
-        dvReq   = ff.raise_orbit(apogeeOrbit)
+        dvReq   = cf.ApogeeRaise(apogeeOrbit)
         
         # Define the engine. Assume an Isp of 450 s
         engMain = cf.Engine(450, thrSweep[jj], 5.5, 'Biprop', 'Cryo')
